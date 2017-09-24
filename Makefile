@@ -10,7 +10,7 @@ win32: log.log
 # run sample system in hosted mode
 log.log: src.src ./exe.exe
 	./exe.exe < $< > $@ && tail $(TAIL) $@
-C = cpp.cpp
-H = hpp.hpp
+C = c.c
+H = h.h
 ./exe.exe: $(C) $(H)
-	$(CXX) $(CXXFLAGS) -o $@ $(C)
+	$(CC) $(CFLAGS) -o $@ $(C)
