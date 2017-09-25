@@ -33,7 +33,7 @@ TARGET ?= i386-elf
 BINUTILS_VER = 2.29.1
 GMP_VER = 6.1.2
 MPFR_VER = 3.1.6
-MPC_VER = 
+MPC_VER = 1.0.3
 CLOOG_VER = 0.18.1
 ISL_VER = 0.18
 
@@ -41,6 +41,7 @@ ISL_VER = 0.18
 BINUTILS = binutils-$(BINUTILS_VER)
 GMP = gmp-$(GMP_VER)
 MPFR = mpfr-$(MPFR_VER)
+MPC = mpc-$(MPC_VER)
 CLOOG = cloog-$(CLOOG_VER)
 ISL = isl-$(ISL_VER)
 
@@ -48,6 +49,7 @@ ISL = isl-$(ISL_VER)
 BINUTILS_GZ = $(BINUTILS).tar.bz2
 GMP_GZ = $(GMP).tar.xz
 MPFR_GZ = $(MPFR).tar.xz
+MPC_GZ = $(MPC).tar.gz
 CLOOG_GZ = $(CLOOG).tar.gz
 ISL_GZ = $(ISL).tar.bz2
 
@@ -64,7 +66,7 @@ dirs:
 
 ## download sources
 .PHONY: gz
-gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ)
+gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(MPC_GZ) $(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ)
 WGET = wget -c -P $(GZ)
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
@@ -72,6 +74,8 @@ $(GZ)/$(GMP_GZ):
 	$(WGET) ftp://ftp.gmplib.org/pub/gmp/$(GMP_GZ) && touch $@
 $(GZ)/$(MPFR_GZ):
 	$(WGET) http://www.mpfr.org/mpfr-current/$(MPFR_GZ) && touch $@	
+$(GZ)/$(MPC_GZ):
+	$(WGET) http://www.multiprecision.org/mpc/download/$(MPC_GZ) && touch $@	
 $(GZ)/$(CLOOG_GZ):	
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(CLOOG_GZ) && touch $@
 $(GZ)/$(ISL_GZ):
