@@ -93,8 +93,8 @@ cclibs: gmp mpfr mpc isl cloog
 CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
 			--with-isl=$(TC) --with-cloog=$(TC) 
 
-CFG_LIBS0 =	--disable-shared 
-CFG_LIBS  = $(CFG_LIBS0) $(CFG_LIBCC) --prefix=$(TC)
+CFG_LIBS0 =	--disable-shared --prefix=$(TC)
+CFG_LIBS  = $(CFG_LIBS0) $(CFG_LIBCC)
 
 gmp: $(TC)/lib/libgmp.a
 $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
