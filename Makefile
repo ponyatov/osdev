@@ -65,11 +65,11 @@ dirs:
 	mkdir -p $(DIRS)
 
 ## download sources
-.PHONY: gz
-gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(MPC_GZ) $(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ)
 WGET = wget -c -P $(GZ)
-$(GZ)/$(BINUTILS_GZ):
-	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
+.PHONY: gz
+gz: $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(MPC_GZ) \
+	$(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ) \
+	$(GZ)/$(BINUTILS_GZ) 
 $(GZ)/$(GMP_GZ):
 	$(WGET) ftp://ftp.gmplib.org/pub/gmp/$(GMP_GZ) && touch $@
 $(GZ)/$(MPFR_GZ):
@@ -80,15 +80,17 @@ $(GZ)/$(CLOOG_GZ):
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(CLOOG_GZ) && touch $@
 $(GZ)/$(ISL_GZ):
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(ISL_GZ) && touch $@
+$(GZ)/$(BINUTILS_GZ):
+	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
 
 ## build
-.PHONY: cross
+.PHONY: cross binutils
 cross: cclibs binutils
 
 ## toolchain libs required
 
-.PHONY: cclibs
-cclibs: gmp mpfr mpc isl cloog
+.PHONY: cclibs gmp mpfr mpc cloog isl
+cclibs: gmp mpfr mpc cloog isl
 
 CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
 			--with-isl=$(TC) --with-cloog=$(TC) 
