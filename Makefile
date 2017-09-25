@@ -35,7 +35,7 @@ BINUTILS = binutils-$(BINUTILS_VER)
 ## archives
 BINUTILS_GZ = $(BINUTILS).tar.xz
 
-# create directory structure
+## create directory structure
 CWD = $(CURDIR)
 GZ = $(CWD)/gz
 SRC = $(CWD)/src
@@ -45,4 +45,10 @@ DIRS = $(GZ) $(SRC) $(TMP) $(TC)
 .PHONY: dirs
 dirs:
 	mkdir -p $(DIRS)
-	
+
+## download sources
+.PHONY: gz
+gz: $(GZ)/$(BINUTILS_GZ)
+WGET = wget -c -P $(GZ)
+$(GZ)/$(BINUTILS_GZ):
+	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
