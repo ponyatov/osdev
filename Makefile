@@ -14,3 +14,9 @@ C = c.c
 H = h.h
 ./exe.exe: $(C) $(H)
 	$(CC) $(CFLAGS) -o $@ $(C)
+	
+# github pull
+.PHONY: pull
+pull:
+	git pull &
+	cd wiki ; git pull &
