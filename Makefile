@@ -32,18 +32,22 @@ TARGET ?= i386-elf
 ## versions
 BINUTILS_VER = 2.29.1
 GMP_VER = 6.1.2
+MPFR_VER = 3.1.6
+MPC_VER = 
 CLOOG_VER = 0.18.1
 ISL_VER = 0.18
 
 ## packages
 BINUTILS = binutils-$(BINUTILS_VER)
 GMP = gmp-$(GMP_VER)
+MPFR = mpfr-$(MPFR_VER)
 CLOOG = cloog-$(CLOOG_VER)
 ISL = isl-$(ISL_VER)
 
 ## archives
-BINUTILS_GZ = $(BINUTILS).tar.xz
+BINUTILS_GZ = $(BINUTILS).tar.bz2
 GMP_GZ = $(GMP).tar.xz
+MPFR_GZ = $(MPFR).tar.xz
 CLOOG_GZ = $(CLOOG).tar.gz
 ISL_GZ = $(ISL).tar.bz2
 
@@ -60,12 +64,14 @@ dirs:
 
 ## download sources
 .PHONY: gz
-gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ)
+gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ)
 WGET = wget -c -P $(GZ)
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
 $(GZ)/$(GMP_GZ):
 	$(WGET) ftp://ftp.gmplib.org/pub/gmp/$(GMP_GZ) && touch $@
+$(GZ)/$(MPFR_GZ):
+	$(WGET) http://www.mpfr.org/mpfr-current/$(MPFR_GZ) && touch $@	
 $(GZ)/$(CLOOG_GZ):	
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(CLOOG_GZ) && touch $@
 $(GZ)/$(ISL_GZ):
@@ -75,16 +81,11 @@ $(GZ)/$(ISL_GZ):
 .PHONY: cross
 cross: binutils
 
-CFG_LIBCC = --with-gmp=$(TC) --with-isl=$(TC) --with-cloog=$(TC) 
-#--with-mpfr=$(TC) --with-mpc=$(TC) \
-	
-CFG_BINUTILS = $(CFG_LIBCC) --prefix=$(TC) --target=$(TARGET)
-binutils: $(TC)/bin/$(TARGET)-as
-$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
-	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
-	$(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS)
-	
 ## toolchain libs required
+
+CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
+			--with-isl=$(TC) --with-cloog=$(TC)
+	
 CFG_LIBS = --disable-shared --prefix=$(TC)
 
 CFG_GMP = $(CFG_LIBS)
@@ -94,15 +95,22 @@ $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	$(SRC)/$(GMP)/configure $(CFG_GMP) && $(MAKE) install-strip
 	 
 CFG_ISL = $(CFG_LIBS) --with-gmp-prefix=$(TC)
-cloog: $(TC)/lib/libcloog.a
-$(TC)/lib/libcloog.a: $(SRC)/$(CLOOG)/README $(TC)/lib/libgmp.a
+cloog: $(TC)/lib/libcloog-isl.a
+$(TC)/lib/libcloog-isl.a: $(SRC)/$(CLOOG)/README $(TC)/lib/libgmp.a
 	rm -rf $(TMP)/$(CLOOG) ; mkdir $(TMP)/$(CLOOG) ; cd $(TMP)/$(CLOOG) ;\
-	$(SRC)/$(CLOOG)/configure $(CFG_ISL)
-#	 && $(MAKE) install-strip
+	$(SRC)/$(CLOOG)/configure $(CFG_ISL) && $(MAKE) install-strip
 isl: $(TC)/lib/libisl.a
-$(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a
+$(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a $(TC)/lib/libcloog-isl.a
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
 	$(SRC)/$(ISL)/configure $(CFG_ISL) && $(MAKE) install-strip
+
+## bintuils
+
+CFG_BINUTILS = $(CFG_LIBCC) --prefix=$(TC) --target=$(TARGET)
+binutils: $(TC)/bin/$(TARGET)-as
+$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
+	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
+	$(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS)
 
 ## template rules for unpacking
 $(SRC)/%/README: $(GZ)/%.tar.gz
