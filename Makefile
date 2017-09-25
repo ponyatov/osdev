@@ -137,6 +137,10 @@ binutils: $(TC)/bin/$(TARGET)-as
 $(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
 	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
 	$(XPATH) $(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS) && $(MAKE) && $(MAKE) install-strip
+	
+## syslinux
+syslinux: $(TC)/boot
+$(TC)/boot: $(SRC)/$(SYSLINUX)/README
 
 ## template rules for unpacking
 $(SRC)/%/README: $(GZ)/%.tar.gz
