@@ -69,12 +69,17 @@ $(GZ)/$(ISL_GZ):
 ## build
 .PHONY: cross
 cross: binutils
-binutils: $(TC)/bin/$(TARGET)-as
-$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/isl
-	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
-	$(SRC)/$(BINUTILS)/configure --prefix=$(TC) --target=$(TARGET)
+
+CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
+	--with-isl=$(TC) --with-cloog=$(TC)
 	
-## toolchaing libs required
+CFG_BINUTILS = --prefix=$(TC) --target=$(TARGET) $(CFG_LIBCC)
+binutils: $(TC)/bin/$(TARGET)-as
+$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
+	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
+	$(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS)
+	
+## toolchain libs required
 CFG_LIBS = --disable-shared --prefix=$(TC)
 
 CFG_GMP = $(CFG_LIBS)
@@ -83,12 +88,11 @@ $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
 	$(SRC)/$(GMP)/configure $(CFG_GMP) && $(MAKE) install-strip
 	 
-CFG_ISL = $(CFG_LIBS)
-isl: $(TC)/lib/isl
-$(TC)/lib/isl: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a
+CFG_ISL = $(CFG_LIBS) --with-gmp-prefix=$(TC)
+isl: $(TC)/lib/libisl.a
+$(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
-	$(SRC)/$(ISL)/configure $(CFG_ISL) --with-gmp-prefix=$(TC)
-#	 && make install-strip
+	$(SRC)/$(ISL)/configure $(CFG_ISL) && $(MAKE) install-strip
 
 ## template rules for unpacking
 $(SRC)/%/README: $(GZ)/%.tar.gz
