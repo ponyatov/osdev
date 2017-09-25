@@ -21,7 +21,7 @@ pull:
 	git pull &
 	cd wiki ; git pull &
 
-# build GNU toolchain from sources
+# build GNU toolchain from sources (some cryptic makefile part, see wiki)
 
 CPU_CORES ?= $(shell grep processor /proc/cpuinfo |wc -l)
 MAKE = make -j$(CPU_CORES)
@@ -83,9 +83,12 @@ $(GZ)/$(ISL_GZ):
 
 ## build
 .PHONY: cross
-cross: binutils
+cross: cclibs binutils
 
 ## toolchain libs required
+
+.PHONY: cclibs
+cclibs: gmp mpfr mpc isl cloog
 
 CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
 			--with-isl=$(TC) --with-cloog=$(TC)
@@ -97,6 +100,12 @@ gmp: $(TC)/lib/libgmp.a
 $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
 	$(SRC)/$(GMP)/configure $(CFG_GMP) && $(MAKE) install-strip
+	 
+CFG_MPFR = $(CFG_LIBS)
+mpfr: $(TC)/lib/libmpfr.a
+$(TC)/lib/libmpfr.a: $(SRC)/$(MPFR)/README
+	rm -rf $(TMP)/$(MPFR) ; mkdir $(TMP)/$(MPFR) ; cd $(TMP)/$(MPFR) ;\
+	$(SRC)/$(MPFR)/configure $(CFG_MPFR) && $(MAKE) install-strip
 	 
 CFG_ISL = $(CFG_LIBS) --with-gmp-prefix=$(TC)
 cloog: $(TC)/lib/libcloog-isl.a
