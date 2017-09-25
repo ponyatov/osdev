@@ -27,28 +27,31 @@ pull:
 TARGET ?= i386-elf
 
 ## versions
-BINUTILS_VER = 2.29.1
 GMP_VER = 6.1.2
 MPFR_VER = 3.1.6
 MPC_VER = 1.0.3
 CLOOG_VER = 0.18.1
 ISL_VER = 0.18
+BINUTILS_VER = 2.29.1
+SYSLINUX_VER = 6.03
 
 ## packages
-BINUTILS = binutils-$(BINUTILS_VER)
 GMP = gmp-$(GMP_VER)
 MPFR = mpfr-$(MPFR_VER)
 MPC = mpc-$(MPC_VER)
 CLOOG = cloog-$(CLOOG_VER)
 ISL = isl-$(ISL_VER)
+BINUTILS = binutils-$(BINUTILS_VER)
+SYSLINUX = syslinux-$(SYSLINUX_VER)
 
 ## archives
-BINUTILS_GZ = $(BINUTILS).tar.bz2
 GMP_GZ = $(GMP).tar.xz
 MPFR_GZ = $(MPFR).tar.xz
 MPC_GZ = $(MPC).tar.gz
 CLOOG_GZ = $(CLOOG).tar.gz
 ISL_GZ = $(ISL).tar.bz2
+BINUTILS_GZ = $(BINUTILS).tar.bz2
+SYSLINUX_GZ = $(SYSLINUX).tar.xz
 
 ## create directory structure
 CWD = $(CURDIR)
@@ -71,7 +74,8 @@ WGET = wget -c -P $(GZ)
 .PHONY: gz
 gz: $(GZ)/$(GMP_GZ) $(GZ)/$(MPFR_GZ) $(GZ)/$(MPC_GZ) \
 	$(GZ)/$(CLOOG_GZ) $(GZ)/$(ISL_GZ) \
-	$(GZ)/$(BINUTILS_GZ) 
+	$(GZ)/$(BINUTILS_GZ) \
+	$(GZ)/$(SYSLINUX_GZ)
 $(GZ)/$(GMP_GZ):
 	$(WGET) ftp://ftp.gmplib.org/pub/gmp/$(GMP_GZ) && touch $@
 $(GZ)/$(MPFR_GZ):
@@ -84,6 +88,8 @@ $(GZ)/$(ISL_GZ):
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(ISL_GZ) && touch $@
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
+$(GZ)/$(SYSLINUX_GZ):
+	$(WGET) https://www.kernel.org/pub/linux/utils/boot/syslinux/$(SYSLINUX_GZ) && touch $@
 
 ## build
 .PHONY: cross binutils
