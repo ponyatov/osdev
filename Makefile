@@ -28,14 +28,17 @@ TARGET ?= i386-elf
 
 ## versions
 BINUTILS_VER = 2.29.1
+GMP_VER = 6.1.2
 ISL_VER = 0.18
 
 ## packages
 BINUTILS = binutils-$(BINUTILS_VER)
+GMP = gmp-$(GMP_VER)
 ISL = isl-$(ISL_VER)
 
 ## archives
 BINUTILS_GZ = $(BINUTILS).tar.xz
+GMP_GZ = $(GMP).tar.xz
 ISL_GZ = $(ISL).tar.bz2
 
 ## create directory structure
@@ -51,10 +54,12 @@ dirs:
 
 ## download sources
 .PHONY: gz
-gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(ISL_GZ)
+gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(GMP_GZ) $(GZ)/$(ISL_GZ)
 WGET = wget -c -P $(GZ)
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
+$(GZ)/$(GMP_GZ):
+	$(WGET) ftp://ftp.gmplib.org/pub/gmp/$(GMP_GZ) && touch $@
 $(GZ)/$(ISL_GZ):
 	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(ISL_GZ) && touch $@
 
@@ -67,10 +72,17 @@ $(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/isl
 	$(SRC)/$(BINUTILS)/configure --prefix=$(TC) --target=$(TARGET)
 	
 ## toolchaing libs required
-CFG_LIBS = --disable-shared --prefix=$(TC) 
+CFG_LIBS = --disable-shared --prefix=$(TC)
+
+CFG_GMP = $(CFG_LIBS)
+gmp: $(TC)/lib/gmp
+$(TC)/lib/gmp: $(SRC)/$(GMP)/README
+	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
+	$(SRC)/$(GMP)/configure $(CFG_GMP)
+	 
 CFG_ISL = $(CFG_LIBS)
 isl: $(TC)/lib/isl
-$(TC)/lib/isl: $(SRC)/$(ISL)/README
+$(TC)/lib/isl: $(SRC)/$(ISL)/README $(TC)/lib/gmp
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
 	$(SRC)/$(ISL)/configure $(CFG_ISL) --with-gmp-prefix=$(TC)
 #	 && make install-strip
