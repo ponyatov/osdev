@@ -28,12 +28,15 @@ TARGET ?= i386-elf
 
 ## versions
 BINUTILS_VER = 2.29.1
+ISL_VER = 0.18
 
 ## packages
 BINUTILS = binutils-$(BINUTILS_VER)
+ISL = isl-$(ISL_VER)
 
 ## archives
 BINUTILS_GZ = $(BINUTILS).tar.xz
+ISL_GZ = $(ISL).tar.bz2
 
 ## create directory structure
 CWD = $(CURDIR)
@@ -48,18 +51,29 @@ dirs:
 
 ## download sources
 .PHONY: gz
-gz: $(GZ)/$(BINUTILS_GZ)
+gz: $(GZ)/$(BINUTILS_GZ) $(GZ)/$(ISL_GZ)
 WGET = wget -c -P $(GZ)
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
+$(GZ)/$(ISL_GZ):
+	$(WGET) ftp://gcc.gnu.org/pub/gcc/infrastructure/$(ISL_GZ) && touch $@
 
 ## build
 .PHONY: cross
 cross: binutils
 binutils: $(TC)/bin/$(TARGET)-as
-$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README
+$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/isl
 	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
-	$(SRC)/$(README)/configure
+	$(SRC)/$(BINUTILS)/configure --prefix=$(TC) --target=$(TARGET)
+	
+## toolchaing libs required
+CFG_LIBS = --disable-shared --prefix=$(TC) 
+CFG_ISL = $(CFG_LIBS)
+isl: $(TC)/lib/isl
+$(TC)/lib/isl: $(SRC)/$(ISL)/README
+	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
+	$(SRC)/$(ISL)/configure $(CFG_ISL) --with-gmp-prefix=$(TC)
+#	 && make install-strip
 
 ## template rules for unpacking
 $(SRC)/%/README: $(GZ)/%.tar.gz
