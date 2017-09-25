@@ -126,7 +126,7 @@ $(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libcloog-isl.a
 
 ## bintuils
 
-CFG_BINUTILS = $(CFG_LIBCC) --prefix=$(TC) --target=$(TARGET)
+CFG_BINUTILS = $(CFG_LIBCC) --prefix=$(TC) --target=$(TARGET) --enable-lto
 binutils: $(TC)/bin/$(TARGET)-as
 $(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
 	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
