@@ -23,9 +23,6 @@ pull:
 
 # build GNU toolchain from sources (some cryptic makefile part, see wiki)
 
-CPU_CORES ?= $(shell grep processor /proc/cpuinfo |wc -l)
-MAKE = make -j$(CPU_CORES)
-
 ## default TARGET
 TARGET ?= i386-elf
 
@@ -63,6 +60,11 @@ DIRS = $(GZ) $(SRC) $(TMP) $(TC)
 .PHONY: dirs
 dirs:
 	mkdir -p $(DIRS)
+	
+## commands & path fix
+XPATH = PATH=$(TC)/bin:$(PATH)
+CPU_CORES ?= $(shell grep processor /proc/cpuinfo |wc -l)
+MAKE = $(XPATH) make -j$(CPU_CORES)
 
 ## download sources
 WGET = wget -c -P $(GZ)
@@ -101,26 +103,26 @@ CFG_LIBS  = $(CFG_LIBS0) $(CFG_LIBCC)
 gmp: $(TC)/lib/libgmp.a
 $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
-	$(SRC)/$(GMP)/configure $(CFG_LIBS) && $(MAKE) install-strip
+	$(XPATH) $(SRC)/$(GMP)/configure $(CFG_LIBS) && $(MAKE) install-strip
 mpfr: $(TC)/lib/libmpfr.a
 $(TC)/lib/libmpfr.a: $(SRC)/$(MPFR)/README $(TC)/lib/libgmp.a
 	rm -rf $(TMP)/$(MPFR) ; mkdir $(TMP)/$(MPFR) ; cd $(TMP)/$(MPFR) ;\
-	$(SRC)/$(MPFR)/configure $(CFG_LIBS) && $(MAKE) install-strip
+	$(XPATH) $(SRC)/$(MPFR)/configure $(CFG_LIBS) && $(MAKE) install-strip
 mpc: $(TC)/lib/libmpc.a
 $(TC)/lib/libmpc.a: $(SRC)/$(MPC)/README $(TC)/lib/libmpfr.a
 	rm -rf $(TMP)/$(MPC) ; mkdir $(TMP)/$(MPC) ; cd $(TMP)/$(MPC) ;\
-	$(SRC)/$(MPC)/configure $(CFG_LIBS) && $(MAKE) install-strip
+	$(XPATH) $(SRC)/$(MPC)/configure $(CFG_LIBS) && $(MAKE) install-strip
 
 CFG_ISL = $(CFG_LIBS0) --with-gmp-prefix=$(TC)
 	
 cloog: $(TC)/lib/libcloog-isl.a
 $(TC)/lib/libcloog-isl.a: $(SRC)/$(CLOOG)/README $(TC)/lib/libmpc.a
 	rm -rf $(TMP)/$(CLOOG) ; mkdir $(TMP)/$(CLOOG) ; cd $(TMP)/$(CLOOG) ;\
-	$(SRC)/$(CLOOG)/configure $(CFG_ISL) && $(MAKE) install-strip
+	$(XPATH) $(SRC)/$(CLOOG)/configure $(CFG_ISL) && $(MAKE) install-strip
 isl: $(TC)/lib/libisl.a
 $(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libcloog-isl.a
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
-	$(SRC)/$(ISL)/configure $(CFG_ISL) && $(MAKE) install-strip
+	$(XPATH) $(SRC)/$(ISL)/configure $(CFG_ISL) && $(MAKE) install-strip
 
 ## bintuils
 
@@ -128,7 +130,7 @@ CFG_BINUTILS = $(CFG_LIBCC) --prefix=$(TC) --target=$(TARGET)
 binutils: $(TC)/bin/$(TARGET)-as
 $(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/libisl.a
 	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
-	$(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS)
+	$(XPATH) $(SRC)/$(BINUTILS)/configure $(CFG_BINUTILS) && $(MAKE) && $(MAKE) install-strip
 
 ## template rules for unpacking
 $(SRC)/%/README: $(GZ)/%.tar.gz
