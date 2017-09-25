@@ -91,31 +91,30 @@ cross: cclibs binutils
 cclibs: gmp mpfr mpc isl cloog
 
 CFG_LIBCC = --with-gmp=$(TC) --with-mpfr=$(TC) --with-mpc=$(TC) \
-			--with-isl=$(TC) --with-cloog=$(TC)
+			--with-isl=$(TC) --with-cloog=$(TC) --with-gmp-prefix=$(TC)
 	
-CFG_LIBS = --disable-shared --prefix=$(TC)
+CFG_LIBS = $(CFG_LIBCC) --disable-shared --prefix=$(TC)
 
-CFG_GMP = $(CFG_LIBS)
 gmp: $(TC)/lib/libgmp.a
 $(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
-	$(SRC)/$(GMP)/configure $(CFG_GMP) && $(MAKE) install-strip
-	 
-CFG_MPFR = $(CFG_LIBS)
+	$(SRC)/$(GMP)/configure $(CFG_LIBS) && $(MAKE) install-strip
 mpfr: $(TC)/lib/libmpfr.a
-$(TC)/lib/libmpfr.a: $(SRC)/$(MPFR)/README
+$(TC)/lib/libmpfr.a: $(SRC)/$(MPFR)/README $(TC)/lib/libgmp.a
 	rm -rf $(TMP)/$(MPFR) ; mkdir $(TMP)/$(MPFR) ; cd $(TMP)/$(MPFR) ;\
-	$(SRC)/$(MPFR)/configure $(CFG_MPFR) && $(MAKE) install-strip
-	 
-CFG_ISL = $(CFG_LIBS) --with-gmp-prefix=$(TC)
+	$(SRC)/$(MPFR)/configure $(CFG_LIBS) && $(MAKE) install-strip
+mpc: $(TC)/lib/libmpc.a
+$(TC)/lib/libmpc.a: $(SRC)/$(MPC)/README $(TC)/lib/libmpfr.a
+	rm -rf $(TMP)/$(MPC) ; mkdir $(TMP)/$(MPC) ; cd $(TMP)/$(MPC) ;\
+	$(SRC)/$(MPC)/configure $(CFG_LIBS) && $(MAKE) install-strip
 cloog: $(TC)/lib/libcloog-isl.a
-$(TC)/lib/libcloog-isl.a: $(SRC)/$(CLOOG)/README $(TC)/lib/libgmp.a
+$(TC)/lib/libcloog-isl.a: $(SRC)/$(CLOOG)/README $(TC)/lib/libmpc.a
 	rm -rf $(TMP)/$(CLOOG) ; mkdir $(TMP)/$(CLOOG) ; cd $(TMP)/$(CLOOG) ;\
-	$(SRC)/$(CLOOG)/configure $(CFG_ISL) && $(MAKE) install-strip
+	$(SRC)/$(CLOOG)/configure $(CFG_LIBS) && $(MAKE) install-strip
 isl: $(TC)/lib/libisl.a
-$(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a $(TC)/lib/libcloog-isl.a
+$(TC)/lib/libisl.a: $(SRC)/$(ISL)/README $(TC)/lib/libcloog-isl.a
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
-	$(SRC)/$(ISL)/configure $(CFG_ISL) && $(MAKE) install-strip
+	$(SRC)/$(ISL)/configure $(CFG_LIBS) && $(MAKE) install-strip
 
 ## bintuils
 
