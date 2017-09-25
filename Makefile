@@ -23,6 +23,9 @@ pull:
 
 # build GNU toolchain from sources
 
+CPU_CORES ?= $(shell grep processor /proc/cpuinfo |wc -l)
+MAKE = make -j$(CPU_CORES)
+
 ## default TARGET
 TARGET ?= i386-elf
 
@@ -75,14 +78,14 @@ $(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README $(TC)/lib/isl
 CFG_LIBS = --disable-shared --prefix=$(TC)
 
 CFG_GMP = $(CFG_LIBS)
-gmp: $(TC)/lib/gmp
-$(TC)/lib/gmp: $(SRC)/$(GMP)/README
+gmp: $(TC)/lib/libgmp.a
+$(TC)/lib/libgmp.a: $(SRC)/$(GMP)/README
 	rm -rf $(TMP)/$(GMP) ; mkdir $(TMP)/$(GMP) ; cd $(TMP)/$(GMP) ;\
-	$(SRC)/$(GMP)/configure $(CFG_GMP)
+	$(SRC)/$(GMP)/configure $(CFG_GMP) && $(MAKE) install-strip
 	 
 CFG_ISL = $(CFG_LIBS)
 isl: $(TC)/lib/isl
-$(TC)/lib/isl: $(SRC)/$(ISL)/README $(TC)/lib/gmp
+$(TC)/lib/isl: $(SRC)/$(ISL)/README $(TC)/lib/libgmp.a
 	rm -rf $(TMP)/$(ISL) ; mkdir $(TMP)/$(ISL) ; cd $(TMP)/$(ISL) ;\
 	$(SRC)/$(ISL)/configure $(CFG_ISL) --with-gmp-prefix=$(TC)
 #	 && make install-strip
