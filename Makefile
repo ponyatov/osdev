@@ -52,3 +52,19 @@ gz: $(GZ)/$(BINUTILS_GZ)
 WGET = wget -c -P $(GZ)
 $(GZ)/$(BINUTILS_GZ):
 	$(WGET) http://ftp.gnu.org/gnu/binutils/$(BINUTILS_GZ) && touch $@
+
+## build
+.PHONY: cross
+cross: binutils
+binutils: $(TC)/bin/$(TARGET)-as
+$(TC)/bin/$(TARGET)-as: $(SRC)/$(BINUTILS)/README
+	rm -rf $(TMP)/$(BINUTILS) ; mkdir $(TMP)/$(BINUTILS) ; cd $(TMP)/$(BINUTILS) ;\
+	$(SRC)/$(README)/configure
+
+## template rules for unpacking
+$(SRC)/%/README: $(GZ)/%.tar.gz
+	cd $(SRC) &&  zcat $< | tar x && touch $@
+$(SRC)/%/README: $(GZ)/%.tar.bz2
+	cd $(SRC) && bzcat $< | tar x && touch $@
+$(SRC)/%/README: $(GZ)/%.tar.xz
+	cd $(SRC) && xzcat $< | tar x && touch $@
